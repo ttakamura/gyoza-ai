@@ -6,7 +6,6 @@
 	<string>このアプリは音声を録音するためにマイクを使用します。</string>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>remote-notification</string>
 		<string>audio</string>
 	</array>
 </dict>

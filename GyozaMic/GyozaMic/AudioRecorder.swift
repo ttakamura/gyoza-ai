@@ -5,9 +5,15 @@ class AudioRecorder: ObservableObject {
     @Published var isRecording = false
     @Published var recordingTime: TimeInterval = 0
     @Published var recordings: [URL] = []
+    @Published var isPlaying = false
+    @Published var currentPlayingURL: URL?
+    @Published var playbackTime: TimeInterval = 0
+    @Published var playbackDuration: TimeInterval = 0
     
     private var audioRecorder: AVAudioRecorder?
+    private var audioPlayer: AVAudioPlayer?
     private var timer: Timer?
+    private var playbackTimer: Timer?
     private var audioSession: AVAudioSession = AVAudioSession.sharedInstance()
     
     init() {
@@ -94,5 +100,55 @@ class AudioRecorder: ObservableObject {
         } catch {
             print("Failed to delete recording: \(error)")
         }
+    }
+    
+    func playRecording(_ url: URL) {
+        if isPlaying && currentPlayingURL == url {
+            pausePlayback()
+            return
+        }
+        
+        stopPlayback()
+        
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.prepareToPlay()
+            audioPlayer?.play()
+            
+            isPlaying = true
+            currentPlayingURL = url
+            playbackTime = 0
+            playbackDuration = audioPlayer?.duration ?? 0
+            
+            playbackTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+                self.playbackTime = self.audioPlayer?.currentTime ?? 0
+                
+                if self.audioPlayer?.isPlaying == false {
+                    self.stopPlayback()
+                }
+            }
+        } catch {
+            print("Failed to play recording: \(error)")
+        }
+    }
+    
+    func pausePlayback() {
+        audioPlayer?.pause()
+        isPlaying = false
+        playbackTimer?.invalidate()
+    }
+    
+    func stopPlayback() {
+        audioPlayer?.stop()
+        playbackTimer?.invalidate()
+        isPlaying = false
+        currentPlayingURL = nil
+        playbackTime = 0
+        playbackDuration = 0
+    }
+    
+    func seekTo(_ time: TimeInterval) {
+        audioPlayer?.currentTime = time
+        playbackTime = time
     }
 }

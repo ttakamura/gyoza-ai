@@ -66,28 +66,15 @@ struct ContentView: View {
                         .font(.headline)
                         .padding(.horizontal)
                     
-                    List {
-                        ForEach(audioRecorder.recordings, id: \.self) { recording in
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text(recording.lastPathComponent)
-                                        .font(.callout)
-                                        .lineLimit(1)
-                                    Text(formatFileDate(recording))
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                                Spacer()
-                                Button(action: {
-                                    audioRecorder.deleteRecording(recording)
-                                }) {
-                                    Image(systemName: "trash")
-                                        .foregroundColor(.red)
-                                }
+                    ScrollView {
+                        LazyVStack(spacing: 10) {
+                            ForEach(audioRecorder.recordings, id: \.self) { recording in
+                                AudioPlayerView(audioRecorder: audioRecorder, recordingURL: recording)
                             }
                         }
+                        .padding(.horizontal)
                     }
-                    .frame(maxHeight: 200)
+                    .frame(maxHeight: 300)
                 }
                 
                 Spacer()
