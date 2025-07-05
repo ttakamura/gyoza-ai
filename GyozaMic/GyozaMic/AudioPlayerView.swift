@@ -4,6 +4,7 @@ import AVFoundation
 struct AudioPlayerView: View {
     @ObservedObject var audioRecorder: AudioRecorder
     let recordingURL: URL
+    @State private var showingShareSheet = false
     
     var body: some View {
         VStack(spacing: 15) {
@@ -51,7 +52,7 @@ struct AudioPlayerView: View {
                 }
             }
             
-            HStack(spacing: 20) {
+            HStack(spacing: 15) {
                 Button(action: {
                     audioRecorder.playRecording(recordingURL)
                 }) {
@@ -74,6 +75,20 @@ struct AudioPlayerView: View {
                         .clipShape(Circle())
                 }
                 .disabled(!isCurrentlyPlaying)
+                
+                Button(action: {
+                    showingShareSheet = true
+                }) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.title2)
+                        .foregroundColor(.white)
+                        .frame(width: 44, height: 44)
+                        .background(Color.green)
+                        .clipShape(Circle())
+                }
+                .sheet(isPresented: $showingShareSheet) {
+                    ShareSheet(items: [recordingURL])
+                }
                 
                 Button(action: {
                     audioRecorder.deleteRecording(recordingURL)
